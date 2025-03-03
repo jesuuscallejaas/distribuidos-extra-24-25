@@ -24,16 +24,31 @@ Se desarrollará un programa que sea capaz de recibir peticiones de operación a
 programa se encargará de:
 
 1. Deserializar la petición recibida conforme al formato especificado más adelante.
-2. Si el formato **no es correcto**, se enviará una respuesta de error al _topic_ de respuestas.
+2. Si el formato **no es correcto**, se enviará una respuesta de error al _topic_ de respuestas. En ningún caso, un
+   mensaje en formato desconocido debe provocar la interrupción de la ejecución del programa.
 3. Si el formato **es correcto**, se enviará una petición al servicio de calculadora, devolviendo el resultado
     a través del _topic_ de respuestas.
 
+El formato esperado para las peticiones serializadas consistirá en cadenas de caracteres con sintáxis JSON que
+representarán el objeto _Peticion_, el cual tendrá los siguientes campos, todos ellos _obligatorios_ y nunca nulos:
+- _id_: identificador único de petición. La respuesta asociada con esta operación tendrá el mismo _id_.
+- _operation_: nombre de la operación que se quiere invocar en el servicio de calculadora.
+- _operands_: lista de operandos que se deben pasar a la operación.
+
+Una vez enviada la petición correspondiente al servicio de calculadora, en caso de poder ejecutarse la operación,
+el programa recibirá un resultado que deberá serializar y enviar al _topic_ correspondiente. El formato de las respuestas
+también consistirá en cadenas JSON resultantes de serializar objetos _Respuesta_, que son objetos con los siguientes
+parámetros:
+- _id_: obligatorio. Contiene el identificador único asociado al objeto _Peticion_.
+- _result_: obligatorio aunque puede valer nulo (_null_ en notación JSON). Contendrá el resultado (si lo hubiera,
+  si no, _null_) de la operación.
+- _reason_: opcional. En caso de error (cuando _result_ sea nulo), el mensaje de error provocado por la petición.
 
 ## Entregable
 
 La práctica se deberá realizar y almacenar en un repositorio de Git privado. La entega consistirá en enviar
 la URL a dicho repositorio, por lo que el alumno deberá asegurarse de que los profesores tengan acceso a
-dicho repositorio.
+dicho repositorio. Si la práctica está en alguna rama diferente de la principal, también se debe indicar en la entrega.
 
 El repositorio deberá contener al menos lo siguiente:
 
@@ -43,6 +58,8 @@ El repositorio deberá contener al menos lo siguiente:
 - El fichero o ficheros de configuración necesarios para la ejecución.
 - Algún sistema de control de dependencias de Python: fichero `pyproject.toml`, `setup.cfg`, `setup.py`, Pipenv,
     Poetry, `requirements.txt`... Su uso debe estar también explicado en el fichero `README.md`
+- Implementación del servicio de calculadora utilizando ZeroC Ice para crear la interfaz de invocación remota.
+- El de-serializador de operaciones que las reenvíe al servicio de calculadora y serialice las respuestas.
 
 ### Fecha de entrega
 
@@ -56,15 +73,11 @@ Dicho repositorio plantilla contiene todos los requisitos especificados en la se
 - Fichero `README.md`
 - Fichero `pyproject.toml` con la configuración del proyecto y de algunas herramientas de evaluación de código.
 - El fichero Slice.
-- Un paquete Python llamado `remotetpes` con la utilería necesaria para cargar el Slice.
-- Módulos dentro de dicho paquete para cada tipo de datos remoto, con la definición del esqueleto de la clase.
-- Un módulo `customset.py` con la implementación de un `set` que sólo admite objetos `str` vista en clase.
-- Módulo `remoteset.py` con la implementación del objeto `RSet` completa, por lo que sólo sería necesario
-    implementar `Rlist`, `RDict`, `Iterable` y `Factory`.
+- Un paquete Python llamado `calculator` con la utilería necesaria para cargar el Slice.
+- Módulos dentro de dicho paquete para la implementación de la interfaz Slice del servicio.
 - Módulo `server.py` con la implementación de una `Ice.Application` que permite la ejecución del servicio y añadir
     el objeto factoría existente (en la plantilla, sin implementar sus métodos).
 - Módulo `command_handlers.py` con el manejador del comando principal (el equivalente a la función `main`).
-- Paquete `tests` con una batería mínima de pruebas unitarias para que sirva de inspiración para realizar más.
 - Fichero de configuración necesario para ejecutar el servicio.
 - Directorio `.github/workflows` con la definición de algunas "Actions" de la integración continua de GitHub que
     realizan un análisis estático de tipos y de la calidad del código.

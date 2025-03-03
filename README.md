@@ -21,7 +21,7 @@ pip install -e .
 To run the template server, just install the package and run
 
 ```
-ssdd-calculator --Ice.Config=config/remotetypes.config
+ssdd-calculator --Ice.Config=config/calculator.config
 ```
 
 ## Configuration

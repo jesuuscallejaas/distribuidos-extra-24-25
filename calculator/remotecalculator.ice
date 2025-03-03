@@ -1,4 +1,4 @@
-module remotecalculator {
+module RemoteCalculator {
     exception ZeroDivisionError{};
     interface Calculator {
         float sum(float a, float b);

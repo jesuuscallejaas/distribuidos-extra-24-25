@@ -20,4 +20,4 @@ classifiers = [
 license = "GPL-3.0-only"
 
 [project.scripts]
-ssdd-calculator = "calculator:calculator"
+ssdd-calculator = "calculator.command_handlers:calculator"
