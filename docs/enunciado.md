@@ -44,6 +44,52 @@ parámetros:
   si no, _null_) de la operación.
 - _reason_: opcional. En caso de error (cuando _result_ sea nulo), el mensaje de error provocado por la petición.
 
+### Formato de mensajes
+
+#### Formato de mensaje de petición de operación
+
+El programa consumirá mensajes de un _topic_ de Kafka donde llegarán las peticiones de operación, que cumplirán con
+el formato siguiente:
+
+- El mensaje será un objeto [JSON][1].
+- El mensaje contendrá las siguientes claves de manera obligatoria:
+    - "id": un "string" que especificará una identificación para la operación, para poderla correlacionar con
+        el mensaje de respuesta.
+    - "operation": un "string" dentro del siguiente enumerado: "sum", "sub", "mult", "div".
+    - "args": será un "object" que contendrá las claves "op1" y "op2", ambas contendrán un valor "float".
+
+Ejemplo de mensaje:
+
+```json
+{
+    "id": "op1",
+    "operation": "sum",
+    "args": {
+        "op1": 5.0,
+        "op2": 10.4
+    }
+}
+```
+
+Cualquier mensaje que no cumpla éste formato, será rechazado. Si el formato es incorrecto, pero al menos tiene el
+valor "id" definido correctamente, se utilizará para enviar un mensaje de respuesta con el error correspondiente
+(_format error_).
+
+#### Formato de mensaje de resultado de operación
+
+Una vez procesada cada operación recibida a través del servicio remoto implementado en Ice, el programa enviará el
+resultado a un _topic_ Kafka, con el siguiente formato:
+
+- El mensaje será un objeto [JSON][1].
+- Em mensaje contendrá las siguientes claves de manera obligatoria:
+    - "id": un "string" que coincidirá con el identificador de la opeoración cuando se recibió.
+    - "status": un valor booleano. "true" indicará que la operación se ha realizado correctamente, "false" que ha
+        ocurrido algún error.
+    - "result": un valor numérico con el resultado de la operación. En caso de error, puede no estar presente, al
+        no existir resultado.
+    - "error": un "string" con el error que ha sucedido. Puede no estar presente en caso de haber funcionado
+        correctamente todo.
+
 ## Entregable
 
 La práctica se deberá realizar y almacenar en un repositorio de Git privado. La entega consistirá en enviar
@@ -84,3 +130,5 @@ Dicho repositorio plantilla contiene todos los requisitos especificados en la se
 
 Se recomienda encarecidamente utilizar dicha plantilla y leer bien el `README.md` para entender el funcionamiento,
 aunque no es obligatorio su uso.
+
+[1]: https://es.wikipedia.org/wiki/JSON
