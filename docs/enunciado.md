@@ -90,6 +90,24 @@ resultado a un _topic_ Kafka, con el siguiente formato:
     - "error": un "string" con el error que ha sucedido. Puede no estar presente en caso de haber funcionado
         correctamente todo.
 
+Ejemplos de mensaje de respuesta:
+
+```json
+{
+    "id": "op1",
+    "status": true,
+    "result": 15.4
+}
+```
+
+```json
+{
+    "id": "op2",
+    "status": false,
+    "error": "operation not found"
+}
+```
+
 ## Entregable
 
 La práctica se deberá realizar y almacenar en un repositorio de Git privado. La entega consistirá en enviar
