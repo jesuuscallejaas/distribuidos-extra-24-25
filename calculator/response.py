@@ -8,5 +8,5 @@ class CalculatorResponse(BaseModel):
 
     id: str
     status: bool
-    result: float | None
-    error: str | None
+    result: float | None = None
+    error: str | None = None
