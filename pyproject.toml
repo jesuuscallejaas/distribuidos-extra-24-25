@@ -11,7 +11,11 @@ authors = [
 ]
 description = "Template for Distributed Systems laboratory"
 requires-python = ">=3.10"
-dependencies = ['zeroc-ice']
+dependencies = [
+    'zeroc-ice',
+    'pydantic',
+    'pytest',
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
