@@ -1,6 +1,6 @@
 # calculator repository template
 
-Template for the extra SSDD laboratory 2024-2025
+Solution for the extra SSDD laboratory 2024-2025
 
 ## Installation
 
@@ -18,28 +18,70 @@ pip install -e .
 
 ## Execution
 
-To run the template server, just install the package and run
+To run the Ice server, just install the package and run
 
 ```
 ssdd-calculator --Ice.Config=config/calculator.config
 ```
 
-## Configuration
+This will output the stringfied proxy of the calculator. Keep it to run kafka.
 
-This template only allows to configure the server endpoint. To do so, you need to modify
-the file `config/calculator.config` and change the existing line.
-
-For example, if you want to make your server to listen always in the same TCP port, your file
-should look like
+You also have to start the docker kafka container. You can do it by running
 
 ```
-calculator.Endpoints=tcp -p 10000
+docker compose up -d
 ```
 
-## Slice usage
+And then, the kafka middleware:
 
-The Slice file is provided inside the `calculator` directory. It is only loaded once when the `calculator`
-package is loaded by Python. It makes your life much easier, as you don't need to load the Slice in every module
-or submodule that you define.
+```
+ssdd-kafka <your-proxy-string>
+```
 
-The code loading the Slice is inside the `__init__.py` file.
+Now you can use kcat to execute the calculator
+
+```
+kcat -b localhost:9092 -P -t requests
+```
+
+And input the following:
+
+```json
+{ "id": "first",  "operation": "sum",  "args": { "op1": 1.0, "op2": 2.0 } }
+{ "id": "second", "operation": "sub",  "args": { "op1": 3.0, "op2": 2.0 } }
+{ "id": "third",  "operation": "mult", "args": { "op1": 4.0, "op2": 5.0 } }
+{ "id": "fourth", "operation": "div",  "args": { "op1": 6.0, "op2": 3.0 } }
+{ "id": "fifth",  "operation": "div",  "args": { "op1": 6.0, "op2": 0.0 } }
+{ "id": "error" }
+```
+
+The results can be seen in the `responses` topic. You can consume it with
+
+```
+kcat -b localhost:9092 -C -t results
+```
+
+Which will output something like
+
+```json
+{"id":"first","status":true,"result":3.0}
+{"id":"second","status":true,"result":1.0}
+{"id":"third","status":true,"result":20.0}
+{"id":"fourth","status":true,"result":2.0}
+{"id":"fifth","status":false,"error":"ZeroDivisionError"}
+{"id":"error","status":false,"error":"2 validation errors for CalculatorRequest..."}
+```
+
+## Testing
+
+To run the tests, you can use pytest. Just run
+
+```
+pytest
+```
+
+Also, there is a test client for the Ice calculator. You can run it by executing
+
+```
+python3 test/client.py
+```
